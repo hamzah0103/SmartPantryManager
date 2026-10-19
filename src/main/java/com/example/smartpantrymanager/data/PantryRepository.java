@@ -4,35 +4,91 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.smartpantrymanager.database.Databasehelper;
+import android.database.Cursor;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.smartpantrymanager.database.DatabaseHelper;
 import com.example.smartpantrymanager.models.PantryItem;
 
 public class PantryRepository {
 
-    private final Databasehelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
 
     public PantryRepository(Context context) {
-        databaseHelper = new Databasehelper(context);
+        databaseHelper = new DatabaseHelper(context);
     }
 
     public boolean addIngredient(PantryItem item) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(Databasehelper.COLUMN_NAME, item.getName());
-        values.put(Databasehelper.COLUMN_QUANTITY, item.getQuantity());
-        values.put(Databasehelper.COLUMN_UNIT, item.getUnit());
-        values.put(Databasehelper.COLUMN_EXPIRY_DATE,
+        values.put(DatabaseHelper.COLUMN_NAME, item.getName());
+        values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
+        values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
+        values.put(DatabaseHelper.COLUMN_EXPIRY_DATE,
                 item.getExpiryDate());
 
         long result = db.insert(
-                Databasehelper.TABLE_PANTRY,
+                DatabaseHelper.TABLE_PANTRY,
                 null,
                 values
         );
 
         return result != -1;
     }
+
+
+    public List<PantryItem> getAllIngredients() {
+        List<PantryItem> ingredients = new ArrayList<>();
+
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+
+        Cursor cursor = db.query(
+                DatabaseHelper.TABLE_PANTRY,
+                null,
+                null,
+                null,
+                null,
+                null,
+                DatabaseHelper.COLUMN_NAME + " ASC"
+        );
+
+        try {
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID)
+                );
+
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME)
+                );
+
+                double quantity = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_QUANTITY)
+                );
+
+                String unit = cursor.getString(
+                        cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_UNIT)
+                );
+
+                String expiryDate = cursor.getString(
+                        cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EXPIRY_DATE)
+                );
+
+                PantryItem item = new PantryItem(
+                        id, name, quantity, unit, expiryDate
+                );
+
+                ingredients.add(item);
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return ingredients;
+    }
+
 
     public void close() {
         databaseHelper.close();

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class Databasehelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Naming database
     private static final String DATABASE_NAME = "smart_pantry.db";
@@ -25,7 +25,7 @@ public class Databasehelper extends SQLiteOpenHelper {
         COLUMN_EXPIRY_DATE + " TEXT" +
         ")";
 
-    public Databasehelper(Context context) {
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

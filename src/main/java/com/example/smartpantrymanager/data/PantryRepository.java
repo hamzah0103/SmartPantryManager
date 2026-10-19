@@ -90,6 +90,20 @@ public class PantryRepository {
     }
 
 
+
+    public boolean deleteIngredient(int id) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+
+        int rowsDeleted = db.delete(
+                DatabaseHelper.TABLE_PANTRY,
+                DatabaseHelper.COLUMN_ID + " = ?",
+                new String[]{String.valueOf(id)}
+        );
+
+        return rowsDeleted > 0;
+    }
+
+
     public void close() {
         databaseHelper.close();
     }

@@ -9,14 +9,12 @@ public class Databasehelper extends SQLiteOpenHelper {
     // Naming database
     private static final String DATABASE_NAME = "smart_pantry.db";
     private static final int DATABASE_VERSION = 1;
-
-    private static final String TABLE_PANTRY = "pantry_items";
-
-    private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "ingredient_name";
-    private static final String COLUMN_QUANTITY = "quantity";
-    private static final String COLUMN_UNIT = "unit";
-    private static final String COLUMN_EXPIRY_DATE = "expiry_date";
+    public static final String TABLE_PANTRY = "pantry_items";
+    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_NAME = "ingredient_name";
+    public static final String COLUMN_QUANTITY = "quantity";
+    public static final String COLUMN_UNIT = "unit";
+    public static final String COLUMN_EXPIRY_DATE = "expiry_date";
 
     private static final String CREATE_PANTRY_TABLE =
         "CREATE TABLE " + TABLE_PANTRY + "(" +

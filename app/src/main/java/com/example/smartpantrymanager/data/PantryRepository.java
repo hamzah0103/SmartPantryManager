@@ -89,8 +89,6 @@ public class PantryRepository {
         return ingredients;
     }
 
-
-
     public boolean deleteIngredient(int id) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
@@ -101,6 +99,27 @@ public class PantryRepository {
         );
 
         return rowsDeleted > 0;
+    }
+
+
+    public boolean updateIngredient(PantryItem item) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_NAME, item.getName());
+        values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
+        values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
+        values.put(DatabaseHelper.COLUMN_EXPIRY_DATE,
+                item.getExpiryDate());
+
+        int rowsUpdated = db.update(
+                DatabaseHelper.TABLE_PANTRY,
+                values,
+                DatabaseHelper.COLUMN_ID + " = ?",
+                new String[]{String.valueOf(item.getId())}
+        );
+
+        return rowsUpdated > 0;
     }
 
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginBottom="10dp"
+    android:background="#E5EDDF">
+
+    <TextView
+        android:id="@+id/tvIngredientName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tomatoes"
+        android:textColor="#243B2A"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvIngredientQuantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="5 pieces"
+        android:textColor="#455448"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvIngredientExpiry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Expiry: Not specified"
+        android:textColor="#647067"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btnEditIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Edit" />
+
+    <Button
+        android:id="@+id/btnDeleteIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete" />
+
+</LinearLayout>

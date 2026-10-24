@@ -3,6 +3,7 @@ package com.example.smartpantrymanager.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import android.database.Cursor;
 import java.util.ArrayList;
@@ -20,22 +21,26 @@ public class PantryRepository {
     }
 
     public boolean addIngredient(PantryItem item) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        try {
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_NAME, item.getName());
-        values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
-        values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
-        values.put(DatabaseHelper.COLUMN_EXPIRY_DATE,
-                item.getExpiryDate());
+            ContentValues values = new ContentValues();
+            values.put(DatabaseHelper.COLUMN_NAME, item.getName());
+            values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
+            values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
+            values.put(DatabaseHelper.COLUMN_EXPIRY_DATE, item.getExpiryDate());
 
-        long result = db.insert(
-                DatabaseHelper.TABLE_PANTRY,
-                null,
-                values
-        );
+            long result = db.insert(
+                    DatabaseHelper.TABLE_PANTRY,
+                    null,
+                    values
+            );
 
-        return result != -1;
+            return result != -1;
+
+        } catch (SQLiteException e) {
+            return false;
+        }
     }
 
 
@@ -90,36 +95,45 @@ public class PantryRepository {
     }
 
     public boolean deleteIngredient(int id) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        try {
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        int rowsDeleted = db.delete(
-                DatabaseHelper.TABLE_PANTRY,
-                DatabaseHelper.COLUMN_ID + " = ?",
-                new String[]{String.valueOf(id)}
-        );
+            int rowsDeleted = db.delete(
+                    DatabaseHelper.TABLE_PANTRY,
+                    DatabaseHelper.COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(id)}
+            );
 
-        return rowsDeleted > 0;
+            return rowsDeleted > 0;
+
+        } catch (SQLiteException e) {
+            return false;
+        }
     }
 
 
     public boolean updateIngredient(PantryItem item) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        try {
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_NAME, item.getName());
-        values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
-        values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
-        values.put(DatabaseHelper.COLUMN_EXPIRY_DATE,
-                item.getExpiryDate());
+            ContentValues values = new ContentValues();
+            values.put(DatabaseHelper.COLUMN_NAME, item.getName());
+            values.put(DatabaseHelper.COLUMN_QUANTITY, item.getQuantity());
+            values.put(DatabaseHelper.COLUMN_UNIT, item.getUnit());
+            values.put(DatabaseHelper.COLUMN_EXPIRY_DATE, item.getExpiryDate());
 
-        int rowsUpdated = db.update(
-                DatabaseHelper.TABLE_PANTRY,
-                values,
-                DatabaseHelper.COLUMN_ID + " = ?",
-                new String[]{String.valueOf(item.getId())}
-        );
+            int rowsUpdated = db.update(
+                    DatabaseHelper.TABLE_PANTRY,
+                    values,
+                    DatabaseHelper.COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(item.getId())}
+            );
 
-        return rowsUpdated > 0;
+            return rowsUpdated > 0;
+
+        } catch (SQLiteException e) {
+            return false;
+        }
     }
 
 

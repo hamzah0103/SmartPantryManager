@@ -57,6 +57,7 @@
             android:layout_height="wrap_content"
             android:hint="e.g. 5"
             android:inputType="numberDecimal"
+            android:contentDescription="Ingredient quantity"
             android:minHeight="48dp"
             android:singleLine="true" />
 
@@ -88,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="YYYY-MM-DD, e.g. 2026-11-30"
-            android:inputType="date"
+            android:inputType="text"
             android:minHeight="48dp"
             android:singleLine="true" />
 

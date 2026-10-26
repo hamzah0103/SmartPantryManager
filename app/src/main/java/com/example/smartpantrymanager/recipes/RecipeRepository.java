@@ -1,5 +1,12 @@
 package com.example.smartpantrymanager.recipes;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.example.smartpantrymanager.database.DatabaseHelper;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,8 +16,8 @@ public class RecipeRepository {
 
     private final List<Recipe> recipes;
 
-    public RecipeRepository() {
-        recipes = createRecipes();
+    public RecipeRepository(Context context) {
+        recipes = loadRecipesFromDatabase(context);
     }
 
     public List<Recipe> getAllRecipes() {
@@ -27,7 +34,149 @@ public class RecipeRepository {
         return null;
     }
 
-    private List<Recipe> createRecipes() {
+    private List<Recipe> loadRecipesFromDatabase(Context context) {
+        List<Recipe> loadedRecipes = new ArrayList<>();
+
+        DatabaseHelper helper = new DatabaseHelper(context);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        Cursor recipeCursor = db.query(
+                DatabaseHelper.TABLE_RECIPES,
+                null,
+                null,
+                null,
+                null,
+                null,
+                DatabaseHelper.COLUMN_RECIPE_ID + " ASC"
+        );
+
+        try {
+            while (recipeCursor.moveToNext()) {
+                int recipeId = recipeCursor.getInt(
+                        recipeCursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_RECIPE_ID
+                        )
+                );
+
+                String name = recipeCursor.getString(
+                        recipeCursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_RECIPE_NAME
+                        )
+                );
+
+                String description = recipeCursor.getString(
+                        recipeCursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_RECIPE_DESCRIPTION
+                        )
+                );
+
+                List<RecipeIngredient> ingredients =
+                        loadIngredients(db, recipeId);
+
+                List<String> instructions =
+                        loadInstructions(db, recipeId);
+
+                loadedRecipes.add(
+                        new Recipe(
+                                recipeId,
+                                name,
+                                description,
+                                ingredients,
+                                instructions
+                        )
+                );
+            }
+        } finally {
+            recipeCursor.close();
+            helper.close();
+        }
+
+        return loadedRecipes;
+    }
+
+    private List<RecipeIngredient> loadIngredients(
+            SQLiteDatabase db,
+            int recipeId
+    ) {
+        List<RecipeIngredient> ingredients = new ArrayList<>();
+
+        Cursor cursor = db.query(
+                DatabaseHelper.TABLE_RECIPE_INGREDIENTS,
+                null,
+                DatabaseHelper.COLUMN_RECIPE_ID + " = ?",
+                new String[]{String.valueOf(recipeId)},
+                null,
+                null,
+                DatabaseHelper.COLUMN_RECIPE_INGREDIENT_ID + " ASC"
+        );
+
+        try {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_INGREDIENT_NAME
+                        )
+                );
+
+                double quantity = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_RECIPE_QUANTITY
+                        )
+                );
+
+                String unit = cursor.getString(
+                        cursor.getColumnIndexOrThrow(
+                                DatabaseHelper.COLUMN_RECIPE_UNIT
+                        )
+                );
+
+                ingredients.add(
+                        new RecipeIngredient(name, quantity, unit)
+                );
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return ingredients;
+    }
+
+    private List<String> loadInstructions(
+            SQLiteDatabase db,
+            int recipeId
+    ) {
+        List<String> instructions = new ArrayList<>();
+
+        Cursor cursor = db.query(
+                DatabaseHelper.TABLE_RECIPE_INSTRUCTIONS,
+                null,
+                DatabaseHelper.COLUMN_RECIPE_ID + " = ?",
+                new String[]{String.valueOf(recipeId)},
+                null,
+                null,
+                DatabaseHelper.COLUMN_INSTRUCTION_ORDER + " ASC"
+        );
+
+        try {
+            while (cursor.moveToNext()) {
+                instructions.add(
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_INSTRUCTION_TEXT
+                                )
+                        )
+                );
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return instructions;
+    }
+
+    // Changed to private static - so seeder accesses the original recipe
+    // without making another repository
+    private static List<Recipe> createRecipes() {
 
         List<Recipe> list = new ArrayList<>();
 
@@ -237,7 +386,8 @@ public class RecipeRepository {
         return list;
     }
 
-    private Recipe recipe(
+    // Changed to private static
+    private static Recipe recipe(
             int id,
             String name,
             String description,
@@ -252,7 +402,8 @@ public class RecipeRepository {
                 Arrays.asList(instructions));
     }
 
-    private List<RecipeIngredient> ingredients(Object... values) {
+    // Changed to private static
+    private static List<RecipeIngredient> ingredients(Object... values) {
 
         List<RecipeIngredient> result = new ArrayList<>();
 
@@ -267,4 +418,83 @@ public class RecipeRepository {
 
         return result;
     }
+
+    // Changed to private static
+    public static void seedRecipes(SQLiteDatabase db) {
+
+        List<Recipe> seedRecipeList = createRecipes();
+
+        db.beginTransaction();
+
+        try {
+            for (Recipe recipe : seedRecipeList) {
+
+                // Save the main recipe information
+                ContentValues recipeValues = new ContentValues();
+                recipeValues.put("recipe_id", recipe.getId());
+                recipeValues.put("recipe_name", recipe.getName());
+                recipeValues.put("description", recipe.getDescription());
+
+                db.insertOrThrow(
+                        "recipes",
+                        null,
+                        recipeValues
+                );
+
+                // Save the ingredients required for this recipe
+                for (RecipeIngredient ingredient : recipe.getIngredients()) {
+
+                    ContentValues ingredientValues = new ContentValues();
+                    ingredientValues.put("recipe_id", recipe.getId());
+                    ingredientValues.put(
+                            "ingredient_name",
+                            ingredient.getName()
+                    );
+                    ingredientValues.put(
+                            "quantity",
+                            ingredient.getQuantity()
+                    );
+                    ingredientValues.put("unit", ingredient.getUnit());
+
+                    db.insertOrThrow(
+                            "recipe_ingredients",
+                            null,
+                            ingredientValues
+                    );
+                }
+
+                // Save each preparation step in its original order
+                int stepNumber = 1;
+
+                for (String instruction : recipe.getInstructions()) {
+
+                    ContentValues instructionValues = new ContentValues();
+                    instructionValues.put("recipe_id", recipe.getId());
+                    instructionValues.put(
+                            "instruction_text",
+                            instruction
+                    );
+                    instructionValues.put(
+                            "instruction_order",
+                            stepNumber
+                    );
+
+                    db.insertOrThrow(
+                            "recipe_instructions",
+                            null,
+                            instructionValues
+                    );
+
+                    stepNumber++;
+                }
+            }
+
+            // Commit all inserts together
+            db.setTransactionSuccessful();
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
 }

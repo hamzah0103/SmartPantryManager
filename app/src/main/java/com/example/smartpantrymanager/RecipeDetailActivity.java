@@ -5,6 +5,8 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
 import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -36,7 +38,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         int recipeId = getIntent().getIntExtra(EXTRA_RECIPE_ID, -1);
 
-        RecipeRepository recipeRepository = new RecipeRepository();
+        RecipeRepository recipeRepository = new RecipeRepository(this);
         Recipe recipe = recipeRepository.getRecipeById(recipeId);
 
         if (recipe == null) {
@@ -52,21 +54,37 @@ public class RecipeDetailActivity extends AppCompatActivity {
         tvRecipeName.setText(recipe.getName());
         tvRecipeDescription.setText(recipe.getDescription());
 
+
+        SharedPreferences preferences = getSharedPreferences(
+                "smart_pantry_settings",
+                Context.MODE_PRIVATE
+        );
+
+        String unitPreference = preferences.getString(
+                "unit_preference",
+                "metric"
+        );
+
         StringBuilder ingredientsText = new StringBuilder();
 
         for (com.example.smartpantrymanager.recipes.RecipeIngredient ingredient
                 : recipe.getIngredients()) {
 
+            String displayQuantity = UnitConverter.convertForDisplay(
+                    ingredient.getQuantity(),
+                    ingredient.getUnit(),
+                    unitPreference
+            );
+
             ingredientsText.append("• ")
                     .append(ingredient.getName())
                     .append(" — ")
-                    .append(ingredient.getQuantity())
-                    .append(" ")
-                    .append(ingredient.getUnit())
+                    .append(displayQuantity)
                     .append("\n");
         }
 
         tvRecipeIngredients.setText(ingredientsText.toString());
+
 
         StringBuilder instructionsText = new StringBuilder();
 

@@ -73,6 +73,7 @@ public class PantryActivity extends AppCompatActivity {
         );
 
         pantryAdapter = new PantryAdapter(
+                this,
                 items,
                 this::editIngredient,
                 this::confirmDeleteIngredient

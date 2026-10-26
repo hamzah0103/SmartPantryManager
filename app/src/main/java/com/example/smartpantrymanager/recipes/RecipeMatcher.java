@@ -103,6 +103,7 @@ public class RecipeMatcher {
         return normalised;
     }
 
+
     private double convertQuantity(
             double quantity,
             String pantryUnit,
@@ -115,35 +116,88 @@ public class RecipeMatcher {
             return quantity;
         }
 
-        // Weight conversions: grams and kilograms.
-        if (from.equals("g") && to.equals("kg")) {
-            return quantity / 1000.0;
+        // Convert all supported weight units to grams.
+        double quantityInGrams;
+
+        switch (from) {
+            case "g":
+                quantityInGrams = quantity;
+                break;
+            case "kg":
+                quantityInGrams = quantity * 1000.0;
+                break;
+            case "lb":
+                quantityInGrams = quantity * 453.59237;
+                break;
+            case "oz":
+                quantityInGrams = quantity * 28.349523125;
+                break;
+            default:
+                quantityInGrams = -1;
         }
 
-        if (from.equals("kg") && to.equals("g")) {
-            return quantity * 1000.0;
+        if (quantityInGrams >= 0) {
+            switch (to) {
+                case "g":
+                    return quantityInGrams;
+                case "kg":
+                    return quantityInGrams / 1000.0;
+                case "lb":
+                    return quantityInGrams / 453.59237;
+                case "oz":
+                    return quantityInGrams / 28.349523125;
+            }
         }
 
-        // Volume conversions: millilitres and litres.
-        if (from.equals("ml") && to.equals("l")) {
-            return quantity / 1000.0;
+        // Convert supported volume units to millilitres.
+        double quantityInMl;
+
+        switch (from) {
+            case "ml":
+                quantityInMl = quantity;
+                break;
+            case "l":
+                quantityInMl = quantity * 1000.0;
+                break;
+            case "cup":
+                quantityInMl = quantity * 236.5882365;
+                break;
+            case "tbsp":
+                quantityInMl = quantity * 14.7867648;
+                break;
+            case "tsp":
+                quantityInMl = quantity * 4.92892159;
+                break;
+            default:
+                quantityInMl = -1;
         }
 
-        if (from.equals("l") && to.equals("ml")) {
-            return quantity * 1000.0;
+        if (quantityInMl >= 0) {
+            switch (to) {
+                case "ml":
+                    return quantityInMl;
+                case "l":
+                    return quantityInMl / 1000.0;
+                case "cup":
+                    return quantityInMl / 236.5882365;
+                case "tbsp":
+                    return quantityInMl / 14.7867648;
+                case "tsp":
+                    return quantityInMl / 4.92892159;
+            }
         }
 
-        // Incompatible units must never count as available.
+        // Never compare incompatible units, such as grams and millilitres.
         return -1;
     }
 
+
+
     private String normaliseUnit(String unit) {
 
-        String normalised = unit.trim()
-                .toLowerCase(Locale.ROOT);
+        String normalised = unit.trim().toLowerCase(Locale.ROOT);
 
         switch (normalised) {
-
             case "gram":
             case "grams":
             case "g":
@@ -154,6 +208,17 @@ public class RecipeMatcher {
             case "kgs":
             case "kg":
                 return "kg";
+
+            case "pound":
+            case "pounds":
+            case "lbs":
+            case "lb":
+                return "lb";
+
+            case "ounce":
+            case "ounces":
+            case "oz":
+                return "oz";
 
             case "millilitre":
             case "millilitres":
@@ -168,6 +233,20 @@ public class RecipeMatcher {
             case "liters":
             case "l":
                 return "l";
+
+            case "cup":
+            case "cups":
+                return "cup";
+
+            case "tablespoon":
+            case "tablespoons":
+            case "tbsp":
+                return "tbsp";
+
+            case "teaspoon":
+            case "teaspoons":
+            case "tsp":
+                return "tsp";
 
             case "piece":
             case "pieces":

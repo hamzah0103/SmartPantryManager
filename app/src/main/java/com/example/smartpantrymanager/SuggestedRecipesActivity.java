@@ -45,7 +45,14 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         List<PantryItem> pantryItems =
                 pantryRepository.getAllIngredients();
 
-        RecipeRepository recipeRepository = new RecipeRepository();
+        RecipeRepository recipeRepository = new RecipeRepository(this);
+
+        android.widget.Toast.makeText(
+                this,
+                "Recipes loaded: "
+                        + recipeRepository.getAllRecipes().size(),
+                android.widget.Toast.LENGTH_LONG
+        ).show();
 
         RecipeMatcher recipeMatcher =
                 new RecipeMatcher(pantryItems);

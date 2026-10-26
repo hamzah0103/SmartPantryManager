@@ -1,4 +1,3 @@
-
 package com.example.smartpantrymanager;
 
 import android.Manifest;
@@ -43,15 +42,15 @@ public class ExpiryReminderHelper {
         this.context = context.getApplicationContext();
     }
 
-    /**
-     * Finds ingredients expiring today or within the next three days.
-     * A notification is posted when the qualifying list changes.
-     */
+
+    // Finds ingredients expiring today or within the next three days.
+    // A notification is then posted when the qualifying list changes.
+
     public void checkExpiringIngredients() {
         SharedPreferences preferences =
                 context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // Do nothing if the user disabled expiry reminders.
+        // Does nothing if the user disabled expiry reminders.
         boolean remindersEnabled =
                 preferences.getBoolean(KEY_EXPIRY_REMINDERS, true);
 
@@ -66,7 +65,7 @@ public class ExpiryReminderHelper {
             return;
         }
 
-        // Android 13 and newer require notification permission.
+        // Android 13 and newer will require notifications permission.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ContextCompat.checkSelfPermission(
                 context,
@@ -85,7 +84,7 @@ public class ExpiryReminderHelper {
             pantryItems = repository.getAllIngredients();
 
         } catch (Exception e) {
-            // Do not update the saved notification signature
+            // Does not update the saved notification signature
             // if the pantry could not be loaded.
             return;
 
@@ -130,7 +129,7 @@ public class ExpiryReminderHelper {
                     continue;
                 }
 
-                // Ensure the date is exactly yyyy-MM-dd.
+                // Ensure the date is exactly YYYY-MM-dd.
                 if (!dateFormat.format(parsedDate).equals(expiryDate)) {
                     continue;
                 }
@@ -197,7 +196,7 @@ public class ExpiryReminderHelper {
 
         // Alert only if at least one ingredient is new compared with the
         // previous qualifying list. Changes to existing ingredients update
-        // the notification without deliberately making it alert again.
+        // the notification without making it alert again.
         Set<String> previousParts = new TreeSet<>();
 
         if (!previousSignature.isEmpty()) {
@@ -232,13 +231,7 @@ public class ExpiryReminderHelper {
         }
     }
 
-    /**
-     * Builds and posts the expiry reminder.
-     *
-     * @param expiringIngredients ingredients that expire soon
-     * @param shouldAlert true if a new qualifying ingredient was detected
-     * @return true if Android accepted the notification
-     */
+
     private boolean showNotification(
             List<String> expiringIngredients,
             boolean shouldAlert
@@ -292,9 +285,8 @@ public class ExpiryReminderHelper {
         }
     }
 
-    /**
-     * Creates the Android notification channel if it does not exist.
-     */
+
+     // Creates the Android notification channel if it does not exist.
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

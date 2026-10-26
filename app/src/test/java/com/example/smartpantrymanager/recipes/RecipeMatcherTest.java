@@ -1,4 +1,3 @@
-
 package com.example.smartpantrymanager.recipes;
 import com.example.smartpantrymanager.recipes.Recipe;
 import com.example.smartpantrymanager.recipes.RecipeMatcher;

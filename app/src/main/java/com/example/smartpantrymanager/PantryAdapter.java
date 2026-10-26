@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartpantrymanager.models.PantryItem;
 
 import java.util.List;
+import java.util.Locale;
 
 public class PantryAdapter
         extends RecyclerView.Adapter<PantryAdapter.PantryViewHolder> {
@@ -27,12 +30,15 @@ public class PantryAdapter
     private final List<PantryItem> pantryItems;
     private final OnEditClickListener editListener;
     private final OnDeleteClickListener deleteListener;
+    private final Context context;
 
     public PantryAdapter(
+            Context context,
             List<PantryItem> pantryItems,
             OnEditClickListener editListener,
             OnDeleteClickListener deleteListener) {
 
+        this.context = context;
         this.pantryItems = pantryItems;
         this.editListener = editListener;
         this.deleteListener = deleteListener;
@@ -56,9 +62,23 @@ public class PantryAdapter
         PantryItem item = pantryItems.get(position);
 
         holder.tvIngredientName.setText(item.getName());
-        holder.tvIngredientQuantity.setText(
-                item.getQuantity() + " " + item.getUnit()
+        SharedPreferences preferences = context.getSharedPreferences(
+                "smart_pantry_settings",
+                Context.MODE_PRIVATE
         );
+
+        String unitPreference = preferences.getString(
+                "unit_preference",
+                "metric"
+        );
+
+        String displayQuantity = UnitConverter.convertForDisplay(
+                item.getQuantity(),
+                item.getUnit(),
+                unitPreference
+        );
+
+        holder.tvIngredientQuantity.setText(displayQuantity);
 
         String expiryDate = item.getExpiryDate();
 

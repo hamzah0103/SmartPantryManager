@@ -4,8 +4,14 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.content.Intent;
+import android.widget.Button;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.smartpantrymanager.data.PantryRepository;
 import com.example.smartpantrymanager.models.PantryItem;
@@ -29,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         btnAddIngredient = findViewById(R.id.btnAddIngredient);
         btnViewPantry = findViewById(R.id.btnViewPantry);
         btnSuggestedRecipes = findViewById(R.id.btnSuggestedRecipes);
+        Button btnSettings = findViewById(R.id.btnSettings);
 
         pantryRepository = new PantryRepository(this);
 
@@ -50,13 +57,21 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btnSuggestedRecipes.setOnClickListener(v ->
-                tvPantrySummary.setText(
-                        "Recipe suggestions will be available soon."
-                )
-        );
+        btnSuggestedRecipes.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+            startActivity(intent);
+        });
 
-        displayPantrySummary();
+        btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SettingsActivity.class
+            );
+            startActivity(intent);
+        });
     }
 
     private void displayPantrySummary() {
@@ -78,10 +93,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkExpiryReminders() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    2001
+            );
+
+            return;
+        }
+
+        new ExpiryReminderHelper(this).checkExpiringIngredients();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+
         displayPantrySummary();
+        checkExpiryReminders();
     }
 
     @Override
